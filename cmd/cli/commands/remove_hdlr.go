@@ -21,7 +21,7 @@ var (
 		},
 		subcmdRemoveObject:   baseLstRngFlags,
 		subcmdRemoveNode:     {},
-		subcmdRemoveDownload: {},
+		subcmdRemoveDownload: []cli.Flag{allFlag},
 		subcmdRemoveDsort:    {},
 	}
 
