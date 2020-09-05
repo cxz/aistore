@@ -33,20 +33,24 @@ var (
 			Usage: "remove buckets, objects, and other entities",
 			Subcommands: []cli.Command{
 				{
-					Name:         subcmdRemoveBucket,
-					Usage:        "remove ais buckets",
-					ArgsUsage:    bucketsArgument,
-					Flags:        removeCmdsFlags[subcmdRemoveBucket],
-					Action:       removeBucketHandler,
-					BashComplete: bucketCompletions(bckCompletionsOpts{multiple: true, provider: cmn.ProviderAIS}),
+					Name:      subcmdRemoveBucket,
+					Usage:     "remove ais buckets",
+					ArgsUsage: bucketsArgument,
+					Flags:     removeCmdsFlags[subcmdRemoveBucket],
+					Action:    removeBucketHandler,
+					BashComplete: bucketCompletions(bckCompletionsOpts{
+						multiple: true, provider: cmn.ProviderAIS,
+					}),
 				},
 				{
-					Name:         subcmdRemoveObject,
-					Usage:        "remove object from bucket",
-					ArgsUsage:    optionalObjectsArgument,
-					Flags:        removeCmdsFlags[subcmdRemoveObject],
-					Action:       removeObjectHandler,
-					BashComplete: bucketCompletions(bckCompletionsOpts{multiple: true, separator: true}),
+					Name:      subcmdRemoveObject,
+					Usage:     "remove object from bucket",
+					ArgsUsage: optionalObjectsArgument,
+					Flags:     removeCmdsFlags[subcmdRemoveObject],
+					Action:    removeObjectHandler,
+					BashComplete: bucketCompletions(bckCompletionsOpts{
+						multiple: true, separator: true,
+					}),
 				},
 				{
 					Name:         subcmdRemoveNode,
@@ -58,7 +62,7 @@ var (
 				},
 				{
 					Name:         subcmdRemoveDownload,
-					Usage:        "remove finished download job with given id from the list",
+					Usage:        "remove finished download job(s) identified by job's ID or regular expression",
 					ArgsUsage:    jobIDArgument,
 					Flags:        removeCmdsFlags[subcmdRemoveDownload],
 					Action:       removeDownloadHandler,
@@ -66,7 +70,7 @@ var (
 				},
 				{
 					Name:         subcmdRemoveDsort,
-					Usage:        fmt.Sprintf("remove finished %s job with given id from the list", cmn.DSortName),
+					Usage:        fmt.Sprintf("remove finished %s job identified by the job's ID", cmn.DSortName),
 					ArgsUsage:    jobIDArgument,
 					Flags:        removeCmdsFlags[subcmdRemoveDsort],
 					Action:       removeDsortHandler,
