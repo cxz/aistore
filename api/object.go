@@ -554,10 +554,8 @@ func DownloadAbort(baseParams BaseParams, id string) error {
 	})
 }
 
-func DownloadRemove(baseParams BaseParams, id string) error {
-	dlBody := downloader.DlAdminBody{
-		ID: id,
-	}
+func DownloadRemove(baseParams BaseParams, id, regex string) error {
+	dlBody := downloader.DlAdminBody{ID: id, Regex: regex}
 	baseParams.Method = http.MethodDelete
 	return DoHTTPRequest(ReqParams{
 		BaseParams: baseParams,

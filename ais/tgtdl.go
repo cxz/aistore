@@ -118,7 +118,21 @@ func (t *targetrunner) downloadHandler(w http.ResponseWriter, r *http.Request) {
 			if glog.FastV(4, glog.SmoduleAIS) {
 				glog.Infof("Removing download: %s", payload)
 			}
-			response, respErr, statusCode = downloaderXact.RemoveJob(payload.ID)
+			if payload.ID != "" {
+				response, respErr, statusCode = downloaderXact.RemoveJob(payload.ID)
+			} else {
+				var regex *regexp.Regexp
+				if payload.Regex != "" {
+					if regex, err = regexp.CompilePOSIX(payload.Regex); err != nil {
+						cmn.InvalidHandlerWithMsg(w, r, err.Error())
+						return
+					}
+				}
+				if glog.FastV(4, glog.SmoduleAIS) {
+					glog.Infof("Listing downloads")
+				}
+				response, respErr, statusCode = downloaderXact.RemoveMatching(regex)
+			}
 		default:
 			cmn.AssertMsg(false,
 				fmt.Sprintf("Invalid action for DELETE request: %s (expected either %s or %s).",

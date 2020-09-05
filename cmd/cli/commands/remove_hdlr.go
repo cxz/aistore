@@ -19,10 +19,12 @@ var (
 		subcmdRemoveBucket: {
 			ignoreErrorFlag,
 		},
-		subcmdRemoveObject:   baseLstRngFlags,
-		subcmdRemoveNode:     {},
-		subcmdRemoveDownload: []cli.Flag{allFlag},
-		subcmdRemoveDsort:    {},
+		subcmdRemoveObject: baseLstRngFlags,
+		subcmdRemoveNode:   {},
+		subcmdRemoveDownload: {
+			allFlag,
+		},
+		subcmdRemoveDsort: {},
 	}
 
 	removeCmds = []cli.Command{
@@ -129,13 +131,17 @@ func removeNodeHandler(c *cli.Context) (err error) {
 }
 
 func removeDownloadHandler(c *cli.Context) (err error) {
-	id := c.Args().First()
-
+	var (
+		regex string
+		id    = c.Args().First()
+	)
 	if c.NArg() < 1 {
 		return missingArgumentsError(c, "download job ID")
 	}
-
-	if err = api.DownloadRemove(defaultAPIParams, id); err != nil {
+	if flagIsSet(c, allFlag) {
+		regex = "*"
+	}
+	if err = api.DownloadRemove(defaultAPIParams, id, regex); err != nil {
 		return
 	}
 

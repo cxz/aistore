@@ -386,7 +386,15 @@ func (d *dispatcher) blockingDispatchDownloadSingle(task *singleObjectTask) (err
 	}
 }
 
-func (d *dispatcher) dispatchRemove(req *request) {
+func (d *dispatcher) dispatchRemoveMatching(req *request) {
+	records := dlStore.getList(req.regex)
+	for _, r := range records {
+		glog.Errorln("remove", r.ID)
+		dlStore.delJob(r.ID)
+	}
+}
+
+func (d *dispatcher) dispatchRemoveJob(req *request) {
 	jInfo, err := d.parent.checkJob(req)
 	if err != nil {
 		return
@@ -395,7 +403,8 @@ func (d *dispatcher) dispatchRemove(req *request) {
 	// There's a slight chance this doesn't happen if target rejoins after target checks for download not running
 	dlInfo := jInfo.ToDlJobInfo()
 	if dlInfo.JobRunning() {
-		req.writeErrResp(fmt.Errorf("download job with id = %s is still running", jInfo.ID), http.StatusBadRequest)
+		err := fmt.Errorf("download job %q is still running", jInfo.ID)
+		req.writeErrResp(err, http.StatusBadRequest)
 		return
 	}
 

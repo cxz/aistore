@@ -257,7 +257,7 @@ func (d *Downloader) Run() (err error) {
 	glog.Infof("Starting %s", d.GetRunName())
 	d.t.GetFSPRG().Reg(d)
 	d.init()
-Loop:
+loop:
 	for {
 		select {
 		case req := <-d.adminCh:
@@ -267,7 +267,11 @@ Loop:
 			case actAbort:
 				d.dispatcher.dispatchAbort(req)
 			case actRemove:
-				d.dispatcher.dispatchRemove(req)
+				if req.id != "" {
+					d.dispatcher.dispatchRemoveJob(req)
+				} else {
+					d.dispatcher.dispatchRemoveMatching(req)
+				}
 			case actList:
 				d.dispatcher.dispatchList(req)
 			default:
@@ -276,14 +280,15 @@ Loop:
 		case job := <-d.downloadCh:
 			d.dispatcher.ScheduleForDownload(job)
 		case req := <-d.mpathReqCh:
-			err = fmt.Errorf("mountpaths have changed when downloader was running; %s: %s; aborting", req.Action, req.Path)
-			break Loop
+			err = fmt.Errorf("mountpaths have changed when downloader was running; %s: %s; aborting",
+				req.Action, req.Path)
+			break loop
 		case <-d.IdleTimer():
 			glog.Infof("%s has timed out. Exiting...", d.GetRunName())
-			break Loop
+			break loop
 		case <-d.ChanAbort():
 			glog.Infof("%s has been aborted. Exiting...", d.GetRunName())
-			break Loop
+			break loop
 		}
 	}
 	d.Stop(err)
@@ -338,6 +343,21 @@ func (d *Downloader) RemoveJob(id string) (resp interface{}, err error, statusCo
 	req := &request{
 		action:     actRemove,
 		id:         id,
+		responseCh: make(chan *response, 1),
+	}
+	d.adminCh <- req
+
+	// await the response
+	r := <-req.responseCh
+	d.DecPending()
+	return r.resp, r.err, r.statusCode
+}
+
+func (d *Downloader) RemoveMatching(regex *regexp.Regexp) (resp interface{}, err error, statusCode int) {
+	d.IncPending()
+	req := &request{
+		action:     actRemove,
+		regex:      regex,
 		responseCh: make(chan *response, 1),
 	}
 	d.adminCh <- req

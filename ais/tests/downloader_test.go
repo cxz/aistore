@@ -70,7 +70,7 @@ func clearDownloadList(t *testing.T) {
 
 	for _, v := range listDownload {
 		tutils.Logf("Removing: %v...\n", v.ID)
-		err := api.DownloadRemove(tutils.BaseAPIParams(), v.ID)
+		err := api.DownloadRemove(tutils.BaseAPIParams(), v.ID, "")
 		tassert.CheckFatal(t, err)
 	}
 }
@@ -282,10 +282,10 @@ func TestDownloadSingle(t *testing.T) {
 	err = api.DownloadAbort(baseParams, id)
 	tassert.CheckError(t, err)
 
-	err = api.DownloadRemove(baseParams, id)
+	err = api.DownloadRemove(baseParams, id, "")
 	tassert.CheckError(t, err)
 
-	err = api.DownloadRemove(baseParams, id)
+	err = api.DownloadRemove(baseParams, id, "")
 	tassert.Errorf(t, err != nil, "expected error when removing non-existent task")
 
 	id, err = api.DownloadSingle(baseParams, generateDownloadDesc(), bck, objName, linkSmall)
